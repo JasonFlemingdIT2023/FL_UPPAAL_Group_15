@@ -2,7 +2,7 @@
 
 **Course:** Formal Methods for Software Engineering
 **Group:** 15 
-**Topic:**  UPPAAL Modeling and Verification of Real-Time Systems
+**Topic:**  UPPAAL Modeling and Verification of Real Time Systems
 **Title:** Formal Modelling, Verification and Statistical Analysis of Constrained Federated Learning Rounds in UPPAAL
 
 ---
@@ -11,7 +11,7 @@
 
 In federated learning (FL), a server repeatedly sends a model to several clients. The clients train locally, upload their updates over a shared network and the server aggregates the updates once enough of them have arrived to a global model. Correctness and timing depend on many interacting design choices. When does the server proceeds to aggregation, how clients share the network, how long local training takes and what happens when clients are slow or fail.
 
-We build a **layered, configurable UPPAAL model** of such a round, extend it step by step. For every layer we **state precise properties and check them with the  UPPAAL verifier**. The deliverable is a set of **claims, each backed by a query and a result.**.
+We build a **layered, configurable UPPAAL model** of such a round and extend it step by step. For every layer we **state precise properties and check them with the  UPPAAL verifier**. The deliverable is a set of **claims, each backed by a query and a result.**.
 
 The FL learning itself is abstracted, because SGD is difficult to model in that context. Abstraction is also a key concept in formal software engineering, which is why this project is applicable for this course. We do not train neural networks and do not prove convergence. We model and verify the *system behaviour* around the learning: protocol, timing, communication, scheduling and a progress abstraction.
 
@@ -19,7 +19,7 @@ The FL learning itself is abstracted, because SGD is difficult to model in that 
 
 | Course requirements (from the assessment sheet) | What we do |
 |---|---|
-| Clearly course-related, scope fits 8-9 people | UPPAAL timed automata, CTL model checking, statistical model checking with SMC; eight parallel tracks or layers/extensions |
+| Clearly course-related, scope fits 8-9 people | UPPAAL timed automata, CTL model checking, statistical model checking with SMC, eight parallel tracks or layers/extensions |
 | Substantive formal-methods work (modelling, specification, verification) | Each layer has a model, a written specification/requirement (properties) and verification results |
 | Main results are checkable and reproducible | rerunable queries, expected outputs, parameters and seeds documented |
 | Report: problem, methods, results, individual contributions at the end | Report plus `CONTRIBUTIONS.md` maintained by contributors |
@@ -29,8 +29,8 @@ The FL learning itself is abstracted, because SGD is difficult to model in that 
 
 **What is needed?**
 
-1. A **property catalog**: every claims/Requirements with an ID, a plain-language statement, a formal query, a query type (safety, liveness, timing, quantitative) and an expected result.
-2. **results, not only "true"**: best and worst cases with round times. For example, the largest local-training setting that still meets the deadline or the smallest scheduler slot that avoids starvation etc.
+1. A **Property catalog**: every claims/Requirements with an ID, a plain-language statement, a formal query, a query type (safety, liveness, timing, quantitative) and an expected result.
+2. **Results, not only "true"**: best and worst cases with round times. For example, the largest local-training setting that still meets the deadline or the smallest scheduler slot that avoids starvation etc.
 3. **Counterexamples from Verifier**:  the verifier's trace is the evidence.
 4. **Reproducibility** on a clean machine.
 5. **Exhaustive and Statistical tests**: what is proved exhaustively, what is only statistical, what is an assumption.
@@ -73,7 +73,7 @@ The FL learning itself is abstracted, because SGD is difficult to model in that 
 
 ## 5. How we extend the baseline
 
-The model becomes **one configurable system**. Each track below adds a part and a set of properties.
+The model becomes **one configurable system**. Each Idea/Layer below adds a part and a set of properties.
 
 ### Idea A: Protocol core
 **Add:** multiple rounds (a per-round clock), client identities , round tags  so the server counts an upload only if it belongs to the current round and has not been counted and a rule for clients still training when a new round starts (abandon, or upload a stale update).
@@ -81,7 +81,7 @@ The model becomes **one configurable system**. Each track below adds a part and 
 
 ### Idea B: Synchronization
 **Add:** switchable modes: wait-for-all, quorum (baseline), deadline-based (aggregate whoever arrived if at least `Kmin`) and optionally asynchronous with bounded staleness `s`.
-**Verify:** wait-for-all has unbounded round time if a client's compute time is unbounded (counterexample) and bounded otherwise etc. Proof based on mode.
+**Verify:** wait-for-all has unbounded round time if a clients compute time is unbounded (counterexample) and bounded otherwise etc. Proof based on mode.
 
 ### Idea C1: Scheduler (shared uplink)
 **Add:** a `Scheduler` template with simultaneous uploads and policies: FIFO, round robin (slot Q), and optionally priority and TDMA.
@@ -96,7 +96,7 @@ The model becomes **one configurable system**. Each track below adds a part and 
 **Verify:** progress never decreases; the target is reachable, earliest and latest **time-to-target** per configuration, the largest `E` that still meets the deadline.
 **Note:** this verifies system behaviour under stated assumptions, not SGD convergence.
 
-### Idea F: Statistical model checking (UPPAAL SMC)
+### Idea E: Statistical model checking (UPPAAL SMC)
 **Add:** random training and network times, random channel changes and failures.
 **Verify (quantitative):** `Pr[<=T](<> S.Failed)`; `E[<=T; N](max: gclk)`; policy comparison; sweeps over N, K, deadline and failure rate.
 
@@ -106,7 +106,7 @@ The model becomes **one configurable system**. Each track below adds a part and 
 - A small Lean lemma
 
 ### The verification matrix
-The central result is a table of properties against configurations (rows: properties, columns: sync mode × scheduler), with ✓, ✗ (counterexample) or an exact bound
+The central result is a table of properties against configurations (rows: properties, columns: Lyer extensions) with ✓, ✗ (counterexample) or an exact bound
 
 ## 6. Properties and requirements
 
