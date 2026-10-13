@@ -1,0 +1,8 @@
+E<> S.Failed
+A<> (S.Done and gclk <= 13)
+A[] (S.Aggregating imply count >= K)
+A<> (S.Done or S.Failed)
+E<> S.Done
+A[] not deadlock
+A[] not S.Failed
+

@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>const int K = 2;
+const int T_DEADLINE = 20;
+const int A_MIN = 1;
+const int A_MAX = 3;
+const int NET_MIN = 1;
+const int NET_MAX = 4;
+
+clock gclk;
+int count = 0;
+
+broadcast chan start;
+chan upload;</declaration>
+	<template>
+		<name>Server</name>
+		<declaration>clock y;</declaration>
+		<location id="id0" x="144" y="59">
+			<label kind="invariant" x="134" y="76">gclk &lt;= 0</label>
+		</location>
+		<location id="id1" x="-255" y="68">
+			<name x="-265" y="34">Waiting</name>
+			<label kind="invariant" x="-265" y="85">gclk &lt;= T_DEADLINE</label>
+		</location>
+		<location id="id2" x="-263" y="-170">
+			<name x="-273" y="-204">Check</name>
+			<committed/>
+		</location>
+		<location id="id3" x="8" y="-161">
+			<name x="-2" y="-195">Aggregating</name>
+			<label kind="invariant" x="-34" y="-144">y &lt;= A_MAX</label>
+		</location>
+		<location id="id4" x="246" y="-59">
+			<name x="236" y="-93">Done</name>
+		</location>
+		<location id="id5" x="-34" y="-68">
+			<name x="-44" y="-102">Failed</name>
+		</location>
+		<init ref="id0"/>
+		<transition id="id6">
+			<source ref="id5"/>
+			<target ref="id5"/>
+			<label kind="synchronisation" x="-136" y="-110">upload?</label>
+			<nail x="-85" y="-85"/>
+			<nail x="-68" y="-102"/>
+		</transition>
+		<transition id="id7">
+			<source ref="id5"/>
+			<target ref="id5"/>
+			<nail x="0" y="-68"/>
+			<nail x="-17" y="-42"/>
+		</transition>
+		<transition id="id8">
+			<source ref="id4"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="264" y="-63">upload?</label>
+			<nail x="297" y="-127"/>
+			<nail x="314" y="-34"/>
+		</transition>
+		<transition id="id9">
+			<source ref="id4"/>
+			<target ref="id4"/>
+			<nail x="221" y="-17"/>
+			<nail x="255" y="-25"/>
+		</transition>
+		<transition id="id10">
+			<source ref="id3"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-17" y="-255">upload?</label>
+			<nail x="8" y="-238"/>
+		</transition>
+		<transition id="id11">
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="-246" y="-76">upload?</label>
+			<label kind="assignment" x="-246" y="-59">count++</label>
+		</transition>
+		<transition id="id12">
+			<source ref="id3"/>
+			<target ref="id4"/>
+			<label kind="guard" x="102" y="-136">y &gt;= A_MIN</label>
+		</transition>
+		<transition id="id13">
+			<source ref="id1"/>
+			<target ref="id5"/>
+			<label kind="guard" x="-119" y="-17">gclk &gt;= T_DEADLINE</label>
+		</transition>
+		<transition id="id14">
+			<source ref="id2"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-331" y="-59">count &lt; K</label>
+		</transition>
+		<transition id="id15">
+			<source ref="id2"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-161" y="-187">count &gt;= K</label>
+			<label kind="assignment" x="-153" y="-161">y = 0</label>
+		</transition>
+		<transition id="id16">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-110" y="34">start!</label>
+		</transition>
+	</template>
+	<template>
+		<name x="5" y="5">Client</name>
+		<parameter>const int tmin, const int tmax</parameter>
+		<declaration>clock c, d; //c is training time and d upload time</declaration>
+		<location id="id17" x="-68" y="85">
+			<name x="-78" y="51">Idle</name>
+		</location>
+		<location id="id18" x="-272" y="-93">
+			<name x="-282" y="-127">Training</name>
+			<label kind="invariant" x="-382" y="-102">c &lt;= tmax</label>
+		</location>
+		<location id="id19" x="-93" y="-229">
+			<name x="-103" y="-263">Uploading</name>
+			<label kind="invariant" x="-68" y="-238">d &lt;= NET_MAX</label>
+		</location>
+		<location id="id20" x="85" y="-76">
+			<name x="75" y="-110">Finished</name>
+		</location>
+		<init ref="id17"/>
+		<transition id="id21">
+			<source ref="id19"/>
+			<target ref="id20"/>
+			<label kind="guard" x="17" y="-170">d &gt;= NET_MIN</label>
+			<label kind="synchronisation" x="42" y="-153">upload!</label>
+		</transition>
+		<transition id="id22">
+			<source ref="id18"/>
+			<target ref="id19"/>
+			<label kind="guard" x="-254" y="-195">c &gt;= tmin</label>
+			<label kind="assignment" x="-255" y="-170">d = 0</label>
+		</transition>
+		<transition id="id23">
+			<source ref="id17"/>
+			<target ref="id18"/>
+			<label kind="synchronisation" x="-170" y="-42">start?</label>
+			<label kind="assignment" x="-170" y="-25">c = 0</label>
+		</transition>
+	</template>
+	<system>S = Server();
+C0 = Client(2, 4); //fast
+C1 = Client(3, 6); //medium
+C2 = Client(5, 30); //slow
+//(straggler)
+system S, C0, C1, C2;</system>
+	<queries>
+		<query>
+			<formula>E&lt;&gt; S.Failed</formula>
+			<comment/>
+			<result outcome="failure" type="quality" timestamp="2026-10-11 00:02:06 +0800">
+			</result>
+		</query>
+		<query>
+			<formula>A&lt;&gt; (S.Done and gclk &lt;= 13)</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2026-10-11 00:01:42 +0800">
+			</result>
+		</query>
+		<query>
+			<formula>A[] (S.Aggregating imply count &gt;= K)</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2026-10-11 00:00:50 +0800">
+			</result>
+		</query>
+		<query>
+			<formula>A&lt;&gt; (S.Done or S.Failed)</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2026-10-11 00:00:08 +0800">
+			</result>
+		</query>
+		<query>
+			<formula>E&lt;&gt; S.Done</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2026-10-10 23:59:35 +0800">
+			</result>
+		</query>
+		<query>
+			<formula>A[] not deadlock</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2026-10-10 23:59:00 +0800">
+			</result>
+		</query>
+	</queries>
+</nta>
