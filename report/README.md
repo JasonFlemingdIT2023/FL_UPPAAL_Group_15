@@ -1,0 +1,1 @@
+Future report. Should be shared. Personally I use Typst. Latex is also possible. Future template will be here.
